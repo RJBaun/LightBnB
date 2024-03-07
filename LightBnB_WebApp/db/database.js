@@ -21,7 +21,7 @@ const getUserWithEmail = function (email) {
   return pool.query(`SELECT * 
     FROM users 
     WHERE email = $1
-    `, [email])
+    `, [email.toLowerCase()])
     .then((result) => {
       console.log(result.rows[0]);
       return result.rows[0]})
@@ -44,7 +44,6 @@ const getUserWithId = function (id) {
   WHERE id = $1
   `, [id])
   .then((result) => {
-    console.log(result.rows);
     return result.rows[0];
   })
   .catch((err) => {
@@ -64,17 +63,11 @@ const addUser = function (user) {
   RETURNING *
   `, [user.name, user.email, user.password])
   .then((result) => {
-    console.log(result.rows);
     return result.rows[0];
   })
   .catch((err) => {
     return null;
   });
-
-  // const userId = Object.keys(users).length + 1;
-  // user.id = userId;
-  // users[userId] = user;
-  // return Promise.resolve(user);
 };
 
 /// Reservations
