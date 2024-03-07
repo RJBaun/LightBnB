@@ -26,7 +26,6 @@ const getUserWithEmail = function (email) {
       console.log(result.rows[0]);
       return result.rows[0]})
     .catch((err) => {
-      console.log(err);
       return null;
     });
 };
