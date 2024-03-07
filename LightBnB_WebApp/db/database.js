@@ -20,8 +20,8 @@ const pool = new Pool({
 const getUserWithEmail = function (email) {
   return pool.query(`SELECT * 
     FROM users 
-    WHERE email LIKE $1
-    `, [`%${email}%`])
+    WHERE email = $1
+    `, [email])
     .then((result) => {
       console.log(result.rows[0]);
       return result.rows[0]})
@@ -45,7 +45,7 @@ const getUserWithId = function (id) {
   `, [id])
   .then((result) => {
     console.log(result.rows);
-    return result.rows;
+    return result.rows[0];
   })
   .catch((err) => {
     return null;
@@ -58,7 +58,6 @@ const getUserWithId = function (id) {
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser = function (user) {
-  console.log(user);
   return pool
   .query(`INSERT INTO users (name, email, password)
   VALUES ($1, $2, $3)
@@ -66,7 +65,7 @@ const addUser = function (user) {
   `, [user.name, user.email, user.password])
   .then((result) => {
     console.log(result.rows);
-    return result.rows;
+    return result.rows[0];
   })
   .catch((err) => {
     return null;
