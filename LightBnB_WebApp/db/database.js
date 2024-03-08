@@ -121,13 +121,12 @@ const getAllProperties = (options, limit = 10) => {
     queryParams.push(options.owner_id);
     queryString += `AND owner_id = $${queryParams.length} `;
   }
-  if (options.minimum_price_per_night) {
+  if (options.minimum_price_per_night && options.maximum_price_per_night) {
     queryParams.push(options.minimum_price_per_night * 100);
-    queryString += `AND cost_per_night > $${queryParams.length} `;
-  }
-  if (options.maximum_price_per_night) {
     queryParams.push(options.maximum_price_per_night * 100);
-    queryString += `AND cost_per_night < $${queryParams.length} `;
+    queryString += `AND (cost_per_night >= $${
+      queryParams.length - 1
+    } AND cost_per_night <= $${queryParams.length})\n`;
   }
   
   queryString += `
@@ -154,16 +153,54 @@ const getAllProperties = (options, limit = 10) => {
     });
 };
 
+// https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTd7mHCO33MRw9vpjkpWbvharV25x78VTX-bg&usqp=CAU
+// https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTkJ_TIZ_g55h8c2CWWt9d8ECi3UOc_zTHzw&usqp=CAU
 /**
  * Add a property to the database
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function (property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  return pool
+  .query(`INSERT INTO properties (
+    owner_id,
+    title,
+    description,
+    thumbnail_photo_url,
+    cover_photo_url,
+    cost_per_night,
+    street,
+    city,
+    province,
+    post_code,
+    country,
+    parking_spaces,
+    number_of_bathrooms,
+    number_of_bedrooms
+    )
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+  RETURNING *
+  `, [property.owner_id,
+    property.title,
+    property.description,
+    property.thumbnail_photo_url,
+    property.cover_photo_url,
+    property.cost_per_night,
+    property.street,
+    property.city,
+    property.province,
+    property.post_code,
+    property.country,
+    property.parking_spaces,
+    property.number_of_bathrooms,
+    property.number_of_bedrooms])
+  .then((result) => {
+    console.log(result.rows[0])
+    return result.rows[0];
+  })
+  .catch((err) => {
+    return null;
+  });
 };
 
 module.exports = {
