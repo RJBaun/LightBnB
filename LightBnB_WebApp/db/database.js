@@ -110,11 +110,12 @@ const getAllProperties = (options, limit = 10) => {
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
   LEFT JOIN property_reviews ON properties.id = property_id
+  WHERE 1=1
   `;
   // check options values and build query on results
   if (options.city) {
     queryParams.push(`%${options.city}%`);
-    queryString += `WHERE city LIKE $${queryParams.length} `;
+    queryString += `AND city LIKE $${queryParams.length} `;
   }
   if (options.owner_id) {
     queryParams.push(options.owner_id);
@@ -135,7 +136,7 @@ const getAllProperties = (options, limit = 10) => {
 
   if (options.minimum_rating) {
     queryParams.push(options.minimum_rating);
-    queryString += `HAVING avg(property_reviews.rating) > $${queryParams.length} `;
+    queryString += `HAVING avg(property_reviews.rating) >= $${queryParams.length} `;
   }
   
   // push limit regardless if value in options, finish qury string
